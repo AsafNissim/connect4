@@ -1,0 +1,93 @@
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_app">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/homeCard"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginEnd="18dp"
+        android:layout_marginTop="44dp"
+        android:layout_marginBottom="44dp"
+        app:cardBackgroundColor="@color/bg_card"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="10dp"
+        app:cardUseCompatPadding="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="26dp">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Connect 4"
+                android:textColor="@color/text_primary"
+                android:textSize="38sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Choose a game mode"
+                android:textColor="@color/text_secondary"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="26dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTwoPlayersRed"
+                style="@style/HomeButtonPrimary"
+                android:backgroundTint="#F44336"
+                android:text="2 Players" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_marginTop="20dp"
+                android:id="@+id/btnTwoPlayersYellow"
+                style="@style/HomeButtonPrimary"
+                android:backgroundTint="#FFEB3B"
+                android:text="2 Players" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnComputerHard"
+                style="@style/HomeButton"
+                android:layout_marginTop="14dp"
+                android:text="Computer - Difficult" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnComputerEasy"
+                style="@style/HomeButton"
+                android:layout_marginTop="14dp"
+                android:text="Computer - Beginner" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnInstructions"
+                style="@style/HomeButtonOutlined"
+                android:text="Instructions" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,16 @@
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E3F2FD"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="הוראות משחק:\n\n• כל שחקן בתורו מכניס דיסק לעמודה.\n• הדיסק נופל לשורה הפנויה התחתונה.\n• המטרה: ליצור רצף של 4 דיסקים בצבע שלך.\n• הרצף יכול להיות אופקי, אנכי או אלכסוני.\n\nבהצלחה!"
+        android:textSize="20sp"
+        android:textColor="#0D47A1"
+        android:textAlignment="center" />
+
+</ScrollView>
