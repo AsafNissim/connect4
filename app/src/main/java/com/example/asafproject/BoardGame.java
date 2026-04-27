@@ -33,11 +33,13 @@ public class BoardGame extends View {
     private Disk.Color animColor;
     private Context context;
     private int mode;
+    private int turn;
 
     public BoardGame(Context c, int mode) {
         super(c);
         this.context = c;
         this.mode = mode;
+        this.turn = mode;
         init();
     }
 
@@ -167,10 +169,12 @@ public class BoardGame extends View {
 
         int col=(int)(e.getX()/cellW);
 
-        if(mode == (int)gameMoudle.getCurrentPlayerInInt())
+        /*if(mode == (int)gameMoudle.getCurrentPlayerInInt())
             FB.getInstance(context).setPlay(col);
+*/
 
-
+        if(mode == turn)
+            FB.getInstance(context).setPlay(col);
 
 /*        Position p = gameMoudle.dropDisk(col);
         if(p==null) return true;
@@ -187,12 +191,12 @@ public class BoardGame extends View {
         Position p = gameMoudle.dropDisk(col);
         if(p==null) return;
 
-/*        if(mode == MainActivity.MODE_TWO_PLAYERS_RED)
+        if(turn == MainActivity.MODE_TWO_PLAYERS_RED)
         {
-            mode = MainActivity.MODE_TWO_PLAYERS_YELLOW;
+            turn = MainActivity.MODE_TWO_PLAYERS_YELLOW;
         }
         else
-            mode = MainActivity.MODE_TWO_PLAYERS_RED;*/
+            turn = MainActivity.MODE_TWO_PLAYERS_RED;
 
 
         // TODO: 15/04/2026

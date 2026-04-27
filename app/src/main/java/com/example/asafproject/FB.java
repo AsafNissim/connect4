@@ -51,6 +51,7 @@ public class FB {
     public static FB getInstance(Context context) {
         if (null == instance) {
             FB.context = context;
+
             instance = new FB();
         }
         return instance;

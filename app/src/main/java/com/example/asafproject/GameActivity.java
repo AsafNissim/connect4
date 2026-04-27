@@ -51,14 +51,13 @@ public class GameActivity extends AppCompatActivity implements GeminiModule.Cell
 
         boardGame.setGameMoudle(gameMoudle);   // TODO: 15/04/2026
 
-        tvTurn.setText("תור: אדום");
+        updateTurnUI();
 
         btnRestart.setOnClickListener(v -> {
-
             gameMoudle.reset();
             gameMoudle.setGameOver(false);
             boardGame.invalidate();
-            tvTurn.setText("תור: אדום");
+            updateTurnUI();
         });
 
         btnBack.setOnClickListener(v -> finish());
@@ -67,6 +66,24 @@ public class GameActivity extends AppCompatActivity implements GeminiModule.Cell
     @Override
     public String boardToGeminiText() {
         return gameMoudle.boardToGeminiText();
+    }
+
+    private void updateTurnUI() {
+        String turn;
+        if(mode == MainActivity.MODE_TWO_PLAYERS_RED)
+            turn = "אני אדום";
+        else
+            turn = "אני צהוב";
+
+
+        if (gameMoudle.getCurrentPlayer() == Disk.Color.RED)
+        {
+            tvTurn.setText(turn +"  תור: אדום  ");
+        } else
+        {
+
+            tvTurn.setText(turn +"  תור: צהוב  ");
+        }
     }
 
     /**
@@ -87,7 +104,7 @@ public class GameActivity extends AppCompatActivity implements GeminiModule.Cell
             return;
         }
 
-        tvTurn.setText(gameMoudle.getCurrentPlayer() == Disk.Color.RED ? "תור: אדום" : "תור: צהוב");
+        updateTurnUI();
 
         if (mode == MainActivity.MODE_TWO_PLAYERS_RED || mode == MainActivity.MODE_TWO_PLAYERS_YELLOW) return;
         if (gameMoudle.getCurrentPlayer() != Disk.Color.YELLOW) return;
@@ -168,6 +185,6 @@ public class GameActivity extends AppCompatActivity implements GeminiModule.Cell
             return;
         }
 
-        tvTurn.setText(gameMoudle.getCurrentPlayer() == Disk.Color.RED ? "תור: אדום" : "תור: צהוב");
+        updateTurnUI();
     }
 }
