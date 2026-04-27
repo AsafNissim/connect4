@@ -32,6 +32,14 @@ public class GameMoudle {
         return currentPlayer;
     }
 
+    public int getCurrentPlayerInInt() {
+        if (currentPlayer == Disk.Color.RED) {
+            return 0;
+        }
+        else
+            return 1;
+    }
+
     public Disk.Color getCellColor(int row, int col) {
         return board[row][col];
     }

@@ -10,8 +10,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String EXTRA_MODE = "EXTRA_MODE";
 
-    public static final int MODE_TWO_PLAYERS_RED = 0;
-    public static final int MODE_TWO_PLAYERS_YELLOW = 1;
+    public static final int MODE_TWO_PLAYERS_RED = 0; // == Disk.Color.RED == 0
+    public static final int MODE_TWO_PLAYERS_YELLOW = 1; // == Disk.Color.YELLOW == 1
     public static final int MODE_EASY = 2;
     public static final int MODE_HARD = 3;
 

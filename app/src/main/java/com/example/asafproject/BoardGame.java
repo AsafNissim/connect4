@@ -32,10 +32,12 @@ public class BoardGame extends View {
     private float animY;
     private Disk.Color animColor;
     private Context context;
+    private int mode;
 
-    public BoardGame(Context c) {
+    public BoardGame(Context c, int mode) {
         super(c);
         this.context = c;
+        this.mode = mode;
         init();
     }
 
@@ -164,7 +166,9 @@ public class BoardGame extends View {
             return true;
 
         int col=(int)(e.getX()/cellW);
-        FB.getInstance(context).setPlay(col);
+
+        if(mode == (int)gameMoudle.getCurrentPlayerInInt())
+            FB.getInstance(context).setPlay(col);
 
 
 
@@ -182,6 +186,14 @@ public class BoardGame extends View {
     public void newColFromFirebase(int col) {
         Position p = gameMoudle.dropDisk(col);
         if(p==null) return;
+
+/*        if(mode == MainActivity.MODE_TWO_PLAYERS_RED)
+        {
+            mode = MainActivity.MODE_TWO_PLAYERS_YELLOW;
+        }
+        else
+            mode = MainActivity.MODE_TWO_PLAYERS_RED;*/
+
 
         // TODO: 15/04/2026
         if(getContext() instanceof GameActivity){

@@ -33,19 +33,23 @@ public class GameActivity extends AppCompatActivity implements GeminiModule.Cell
         Button btnRestart = findViewById(R.id.btnRestart);
         Button btnBack = findViewById(R.id.btnBack);
 
+        Intent intent = getIntent();
+        mode = intent.getIntExtra(MainActivity.EXTRA_MODE, MainActivity.MODE_TWO_PLAYERS_RED);
+
+
         gameMoudle = new GameMoudle();
 
 
         geminiModule = new GeminiModule();
 
-        boardGame = new BoardGame(this);
+        boardGame = new BoardGame(this, mode);
         ll.addView(boardGame);
 
 
-        boardGame.setGameMoudle(gameMoudle);   // TODO: 15/04/2026
 
-        Intent intent = getIntent();
-        mode = intent.getIntExtra(MainActivity.EXTRA_MODE, MainActivity.MODE_TWO_PLAYERS_RED);
+
+
+        boardGame.setGameMoudle(gameMoudle);   // TODO: 15/04/2026
 
         tvTurn.setText("תור: אדום");
 
