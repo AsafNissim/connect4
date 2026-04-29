@@ -33,6 +33,7 @@ public class InstructionActivity extends AppCompatActivity {
                     int lang = textToSpeech.setLanguage(Locale.ENGLISH);
                 }
             }
+
         });
 
         tvS = findViewById(R.id.btnS);
