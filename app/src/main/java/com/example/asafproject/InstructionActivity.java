@@ -18,6 +18,7 @@ public class InstructionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_instruction);
+        tvS = findViewById(R.id.tvS);
         tvS.setText("• Each player takes turns dropping a disc into a column.\n" +
                 "• The disc falls to the lowest available space in that column.\n" +
                 "• The goal: create a line of 4 discs in your color.\n" +
@@ -36,7 +37,7 @@ public class InstructionActivity extends AppCompatActivity {
 
         });
 
-        tvS = findViewById(R.id.btnS);
+
        tvS.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

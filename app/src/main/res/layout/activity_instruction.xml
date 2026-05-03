@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/btnS"
+        android:id="@+id/tvS"
         android:textSize="20sp"
         android:textColor="#0D47A1"
         android:textAlignment="center" />
