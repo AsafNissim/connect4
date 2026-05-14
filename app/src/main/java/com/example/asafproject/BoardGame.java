@@ -39,7 +39,12 @@ public class BoardGame extends View {
         super(c);
         this.context = c;
         this.mode = mode;
+        if(mode==MainActivity.MODE_TWO_PLAYERS_RED || mode==MainActivity.MODE_TWO_PLAYERS_YELLOW)
+        {
+            FB.getInstance(context).setPlay(10);
+        }
         this.turn = mode;
+        this.turn = 0;
         init();
     }
 
@@ -173,8 +178,20 @@ public class BoardGame extends View {
             FB.getInstance(context).setPlay(col);
 */
 
-        if(mode == turn)
-            FB.getInstance(context).setPlay(col);
+            if(mode==MainActivity.MODE_TWO_PLAYERS_RED || mode==MainActivity.MODE_TWO_PLAYERS_YELLOW)
+            {
+                if(mode == turn)
+                {
+                    FB.getInstance(context).setPlay(col);
+                }
+            }
+            else
+            {
+                FB.getInstance(context).setPlay(col);
+            }
+
+
+
 
 /*        Position p = gameMoudle.dropDisk(col);
         if(p==null) return true;

@@ -34,9 +34,11 @@ public class FB {
             public void onDataChange( DataSnapshot snapshot) {
                 int col = snapshot.getValue(Integer.class);
 
-                ((GameActivity)context).boardGame.newColFromFirebase(col);
-
-
+                if(col != 10)//איפוס פייר בייס לערך לא הגיוני לתיקון באג
+                {
+                    ((GameActivity)context).boardGame.newColFromFirebase(col);
+                    setPlay(10);
+                }
 
             }
 
