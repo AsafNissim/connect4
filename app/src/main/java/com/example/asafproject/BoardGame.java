@@ -215,7 +215,7 @@ public class BoardGame extends View {
         else
             turn = MainActivity.MODE_TWO_PLAYERS_RED;
 
-
+//a
         // TODO: 15/04/2026
         if(getContext() instanceof GameActivity){
             animateDrop(p,()->((GameActivity)getContext()).onDiskPlaced(p));
