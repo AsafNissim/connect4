@@ -56,7 +56,7 @@ public class GameActivity extends AppCompatActivity implements GeminiModule.Cell
         btnRestart.setOnClickListener(v -> {
             gameMoudle.reset();
             gameMoudle.setGameOver(false);
-            boardGame.invalidate();
+            boardGame.reset();
             updateTurnUI();
         });
 

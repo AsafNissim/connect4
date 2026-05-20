@@ -14,6 +14,7 @@ public class GameMoudle {
 
     public GameMoudle() {
         reset();
+
     }
 
     public void reset() {
@@ -23,6 +24,7 @@ public class GameMoudle {
             }
         }
         currentPlayer = Disk.Color.RED;
+
     }
 
     public int getRows() { return ROWS; }

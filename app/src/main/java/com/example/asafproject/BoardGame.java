@@ -45,6 +45,8 @@ public class BoardGame extends View {
         }
         this.turn = mode;
         this.turn = 0;
+        this.turn = MainActivity.MODE_TWO_PLAYERS_RED;
+
         init();
     }
 
@@ -222,5 +224,10 @@ public class BoardGame extends View {
         } else invalidate();
 
 
+    }
+
+    public void reset() {
+        this.turn = MainActivity.MODE_TWO_PLAYERS_RED;
+        invalidate();
     }
 }
