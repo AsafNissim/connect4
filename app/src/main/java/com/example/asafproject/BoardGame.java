@@ -1,18 +1,13 @@
 package com.example.asafproject;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
-
-import androidx.annotation.Nullable;
 
 public class BoardGame extends View {
 
@@ -50,11 +45,6 @@ public class BoardGame extends View {
         init();
     }
 
-/*    public BoardGame(Context c, @Nullable AttributeSet a) {
-        super(c, a);
-        init();
-    }*/
-
     private void init() {
         boardPaint.setARGB(255,20,90,200);
         holePaint.setARGB(255,40,40,40);
@@ -67,37 +57,36 @@ public class BoardGame extends View {
         invalidate();
     }
 
-    public void animateDrop(Position p, Runnable end) {
+    public void animateDrop(final Position p, final Runnable end) {
         if (p == null) return;
-        // TODO: 15/04/2026
         animCol = p.getCol();
         animRow = p.getRow();
         animColor = gameMoudle.getCellColor(animRow, animCol);
         animating = true;
 
-        float start = -cellH;
-        float finish = animRow * cellH + cellH/2f;
+        final float start = -cellH;
+        final float finish = animRow * cellH + cellH / 2f;
 
-        ValueAnimator va = ValueAnimator.ofFloat(start, finish);
-        va.setDuration(250);
-        va.setInterpolator(new DecelerateInterpolator());
-
-        va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        new Thread(new Runnable() {
             @Override
-            public void onAnimationUpdate(ValueAnimator a) {
-                animY = (float) a.getAnimatedValue();
-                invalidate();
-            }
-        });
-
-        va.start();
-        va.addListener(new android.animation.AnimatorListenerAdapter() {
-            @Override public void onAnimationEnd(android.animation.Animator animation) {
+            public void run() {
+                int steps = 25;
+                for (int i = 0; i <= steps; i++) {
+                    animY = start + (finish - start) * (i / (float) steps);
+                    postInvalidate();
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
                 animating = false;
-                invalidate();
-                if (end!=null) end.run();
+                postInvalidate();
+                if (end != null) {
+                    post(end);
+                }
             }
-        });
+        }).start();
     }
 
     @Override protected void onSizeChanged(int w,int h,int ow,int oh){
@@ -172,45 +161,28 @@ public class BoardGame extends View {
         if(e.getAction()!=MotionEvent.ACTION_DOWN)
             return true;
 
-        // action down
-
         if(gameMoudle==null || animating)
             return true;
 
         int col=(int)(e.getX()/cellW);
 
-        /*if(mode == (int)gameMoudle.getCurrentPlayerInInt())
-            FB.getInstance(context).setPlay(col);
-*/
-
-            if(mode==MainActivity.MODE_TWO_PLAYERS_RED || mode==MainActivity.MODE_TWO_PLAYERS_YELLOW)
-            {
-                if(mode == turn)
-                {
-                    FB.getInstance(context).setPlay(col);
-                }
-            }
-            else
+        if(mode==MainActivity.MODE_TWO_PLAYERS_RED || mode==MainActivity.MODE_TWO_PLAYERS_YELLOW)
+        {
+            if(mode == turn)
             {
                 FB.getInstance(context).setPlay(col);
             }
-
-
-
-
-/*        Position p = gameMoudle.dropDisk(col);
-        if(p==null) return true;
-
-        // TODO: 15/04/2026
-        if(getContext() instanceof GameActivity){
-            animateDrop(p,()->((GameActivity)getContext()).onDiskPlaced(p));
-        } else invalidate();*/
+        }
+        else
+        {
+            FB.getInstance(context).setPlay(col);
+        }
 
         return true;
     }
 
     public void newColFromFirebase(int col) {
-        Position p = gameMoudle.dropDisk(col);
+        final Position p = gameMoudle.dropDisk(col);
         if(p==null) return;
 
         if(turn == MainActivity.MODE_TWO_PLAYERS_RED)
@@ -220,8 +192,6 @@ public class BoardGame extends View {
         else
             turn = MainActivity.MODE_TWO_PLAYERS_RED;
 
-//a
-        // TODO: 15/04/2026
         if(getContext() instanceof GameActivity){
             animateDrop(p, new Runnable() {
                 @Override
@@ -230,8 +200,6 @@ public class BoardGame extends View {
                 }
             });
         } else invalidate();
-
-
     }
 
     public void reset() {
