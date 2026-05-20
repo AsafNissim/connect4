@@ -82,9 +82,12 @@ public class BoardGame extends View {
         va.setDuration(250);
         va.setInterpolator(new DecelerateInterpolator());
 
-        va.addUpdateListener(a -> {
-            animY = (float)a.getAnimatedValue();
-            invalidate();
+        va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator a) {
+                animY = (float) a.getAnimatedValue();
+                invalidate();
+            }
         });
 
         va.start();
@@ -220,7 +223,12 @@ public class BoardGame extends View {
 //a
         // TODO: 15/04/2026
         if(getContext() instanceof GameActivity){
-            animateDrop(p,()->((GameActivity)getContext()).onDiskPlaced(p));
+            animateDrop(p, new Runnable() {
+                @Override
+                public void run() {
+                    ((GameActivity)getContext()).onDiskPlaced(p);
+                }
+            });
         } else invalidate();
 
 

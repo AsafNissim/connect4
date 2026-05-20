@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -53,14 +54,22 @@ public class GameActivity extends AppCompatActivity implements GeminiModule.Cell
 
         updateTurnUI();
 
-        btnRestart.setOnClickListener(v -> {
-            gameMoudle.reset();
-            gameMoudle.setGameOver(false);
-            boardGame.reset();
-            updateTurnUI();
+        btnRestart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gameMoudle.reset();
+                gameMoudle.setGameOver(false);
+                boardGame.reset();
+                updateTurnUI();
+            }
         });
 
-        btnBack.setOnClickListener(v -> finish());
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     @Override
@@ -122,10 +131,18 @@ public class GameActivity extends AppCompatActivity implements GeminiModule.Cell
 
         Toast.makeText(this, "מחשב חושב...", Toast.LENGTH_SHORT).show();
 
-        handler.postDelayed(() -> {
-            Position aiPlaced = gameMoudle.aiMoveRandom();
-            if (aiPlaced != null) {
-                boardGame.animateDrop(aiPlaced, () -> afterAiMove(aiPlaced));
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                final Position aiPlaced = gameMoudle.aiMoveRandom();
+                if (aiPlaced != null) {
+                    boardGame.animateDrop(aiPlaced, new Runnable() {
+                        @Override
+                        public void run() {
+                            afterAiMove(aiPlaced);
+                        }
+                    });
+                }
             }
         }, 800);
     }
@@ -138,33 +155,54 @@ public class GameActivity extends AppCompatActivity implements GeminiModule.Cell
 
         geminiModule.requestHardMove(this, new GeminiModule.MoveCallback() {
             @Override
-            public void onMove(int col) {
-                handler.postDelayed(() -> {
+            public void onMove(final int col) {
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
 
-                    Position aiPlaced = gameMoudle.dropDisk(col);
+                        final Position aiPlaced = gameMoudle.dropDisk(col);
 
-                    if (aiPlaced == null) {
-                        Position fallback = gameMoudle.aiMoveHardLocal();
-                        if (fallback != null) {
-                            boardGame.animateDrop(fallback, () -> afterAiMove(fallback));
+                        if (aiPlaced == null) {
+                            final Position fallback = gameMoudle.aiMoveHardLocal();
+                            if (fallback != null) {
+                                boardGame.animateDrop(fallback, new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        afterAiMove(fallback);
+                                    }
+                                });
+                            }
+                            return;
                         }
-                        return;
+
+                        boardGame.animateDrop(aiPlaced, new Runnable() {
+                            @Override
+                            public void run() {
+                                afterAiMove(aiPlaced);
+                            }
+                        });
+
                     }
-
-                    boardGame.animateDrop(aiPlaced, () -> afterAiMove(aiPlaced));
-
                 }, 3000);
             }
 
             @Override
             public void onError(String msg) {
-                handler.postDelayed(() -> {
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
 
-                    Position aiPlaced = gameMoudle.aiMoveHardLocal();
-                    if (aiPlaced != null) {
-                        boardGame.animateDrop(aiPlaced, () -> afterAiMove(aiPlaced));
+                        final Position aiPlaced = gameMoudle.aiMoveHardLocal();
+                        if (aiPlaced != null) {
+                            boardGame.animateDrop(aiPlaced, new Runnable() {
+                                @Override
+                                public void run() {
+                                    afterAiMove(aiPlaced);
+                                }
+                            });
+                        }
+
                     }
-
                 }, 3000);
             }
         });
