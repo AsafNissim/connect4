@@ -87,24 +87,29 @@ public class GameActivity extends AppCompatActivity implements GeminiModule.Cell
     }
 
     /**
-     * מעדכן את ה-TextView שמציג למי התור ואיזה שחקן המשתמש.
+     * מעדכן את ה-TextView שמציג למי התור ואיזה צבע המשתמש.
+     * הוחלף הטקסט בעיגולים צבעוניים ותוקן הבאג של ה-Restart ברמות מחשב.
      */
     private void updateTurnUI() {
-        String turn;
-        // קביעת טקסט לפי הצבע שהמשתמש בחר
-        if(mode == MainActivity.MODE_TWO_PLAYERS_RED)
-            turn = "אני אדום";
-        else
-            turn = "אני צהוב";
-
-        // בדיקה מי התור הנוכחי במוח של המשחק
-        if (gameMoudle.getCurrentPlayer() == Disk.Color.RED)
-        {
-            tvTurn.setText(turn +"  תור: אדום  ");
-        } else
-        {
-            tvTurn.setText(turn +"  תור: צהוב  ");
+        String playerIndicator;
+        
+        // במצבי מחשב (Easy/Hard) המשתמש הוא תמיד אדום.
+        // רק אם המצב הוא במפורש שחקן צהוב, נציג עיגול צהוב.
+        if (mode == MainActivity.MODE_TWO_PLAYERS_YELLOW) {
+            playerIndicator = "אני: 🟡";
+        } else {
+            playerIndicator = "אני: 🔴";
         }
+
+        // הצגת התור הנוכחי באמצעות עיגול צבעוני
+        String currentTurn;
+        if (gameMoudle.getCurrentPlayer() == Disk.Color.RED) {
+            currentTurn = "תור: 🔴";
+        } else {
+            currentTurn = "תור: 🟡";
+        }
+        
+        tvTurn.setText(playerIndicator + "   " + currentTurn);
     }
 
     /**

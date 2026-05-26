@@ -41,8 +41,7 @@ public class BoardGame extends View {
         {
             FB.getInstance(context).setPlay(10);
         }
-        this.turn = mode; 
-        this.turn = 0;
+
         this.turn = MainActivity.MODE_TWO_PLAYERS_RED; // הגדרת תור התחלתי לאדום
 
         init(); // קריאה לפעולת האתחול של הצבעים
