@@ -1,22 +1,35 @@
 package com.example.asafproject;
 
+/**
+ * GameMoudle - ה"מוח" או הלוגיקה של המשחק.
+ * המחלקה הזו אחראית על ניהול מצב הלוח, בדיקת ניצחון, וביצוע מהלכי מחשב.
+ * היא לא יודעת כלום על גרפיקה, רק על נתונים.
+ */
 public class GameMoudle {
 
+    // קבועים לייצוג מצב הניצחון
     public static final int redWin = 0;
     public static final int yellowWin = 1;
     public static final int noWin = 2;
 
+    // גודל הלוח הסטנדרטי של קונקט 4
     private static final int ROWS = 6;
     private static final int COLS = 7;
 
+    // המערך הדו-ממדי שמייצג את הלוח הפיזי
     private final Disk.Color[][] board = new Disk.Color[6][7];
+    
+    // משתנה שעוקב אחרי מי השחקן שצריך לשחק עכשיו
     private Disk.Color currentPlayer = Disk.Color.RED;
 
+    // פעולה בונה - מאתחלת את המשחק
     public GameMoudle() {
         reset();
-
     }
 
+    /**
+     * מאתחלת את הלוח - צובעת את כל התאים ב"ריק" וקובעת שהאדום מתחיל.
+     */
     public void reset() {
         for (int r = 0; r < 6; r++) {
             for (int c = 0; c < 7; c++) {
@@ -24,9 +37,9 @@ public class GameMoudle {
             }
         }
         currentPlayer = Disk.Color.RED;
-
     }
 
+    // פונקציות עזר לקבלת נתוני הלוח
     public int getRows() { return ROWS; }
     public int getCols() { return COLS; }
 
@@ -34,42 +47,46 @@ public class GameMoudle {
         return currentPlayer;
     }
 
-/*    public int getCurrentPlayerInInt() {
-        if (currentPlayer == Disk.Color.RED) {
-            return 0;
-        }
-        else
-            return 1;
-    }*/
-
+    // קבלת הצבע של תא ספציפי בלוח
     public Disk.Color getCellColor(int row, int col) {
         return board[row][col];
     }
 
-    // מפיל דיסק בעמודה ומחזיר Position של הנחיתה. אם העמודה מלאה מחזיר null.
+    /**
+     * הפעולה שמבצעת "נפילה" של דיסקית לתוך עמודה.
+     * @param col העמודה אליה השחקן רוצה להכניס דיסקית.
+     * @return אובייקט Position עם השורה והעמודה שבה הדיסקית נחתה, או null אם העמודה מלאה.
+     */
     public Position dropDisk(int col) {
+        // הגנה: בדיקה שהעמודה בטווח התקין
         if (col < 0 || col >= COLS) return null;
 
+        // עוברים מהשורה התחתונה כלפי מעלה כדי למצוא את התא הריק הראשון
         for (int row = ROWS - 1; row >= 0; row--) {
             if (board[row][col] == Disk.Color.EMPTY) {
+                // מניחים את הדיסקית של השחקן הנוכחי
                 board[row][col] = currentPlayer;
 
                 Position placed = new Position(row, col);
 
-                // החלפת תור
+                // החלפת תורות בין אדום לצהוב
                 if (currentPlayer == Disk.Color.RED) {
                     currentPlayer = Disk.Color.YELLOW;
                 } else {
                     currentPlayer = Disk.Color.RED;
                 }
 
-                return placed;
+                return placed; // מחזירים את המיקום בו הדיסקית נעצרה
             }
         }
-        return null; // עמודה מלאה
+        return null; // אם הגענו לכאן, סימן שהעמודה מלאה לגמרי
     }
 
-    // מחזיר redWin / yellowWin / noWin
+    /**
+     * בדיקה האם המהלך האחרון הוביל לניצחון (4 בשירוה).
+     * @param lastMove המיקום האחרון שבו הונחה דיסקית.
+     * @return redWin / yellowWin / noWin.
+     */
     public int isWin(Position lastMove) {
         if (lastMove == null) return noWin;
 
@@ -78,18 +95,27 @@ public class GameMoudle {
         Disk.Color color = board[r][c];
         if (color == Disk.Color.EMPTY) return noWin;
 
+        // בדיקה ב-4 כיוונים: אופקי, אנכי, ו-2 אלכסונים
+        // משתמשים בפונקציה count כדי לספור כמה דיסקיות מאותו צבע יש ברצף
         boolean win =
-                count(r, c, 0, 1, color) + count(r, c, 0, -1, color) - 1 >= 4 ||
-                        count(r, c, 1, 0, color) + count(r, c, -1, 0, color) - 1 >= 4 ||
-                        count(r, c, 1, 1, color) + count(r, c, -1, -1, color) - 1 >= 4 ||
-                        count(r, c, 1, -1, color) + count(r, c, -1, 1, color) - 1 >= 4;
+                count(r, c, 0, 1, color) + count(r, c, 0, -1, color) - 1 >= 4 || // אופקי
+                count(r, c, 1, 0, color) + count(r, c, -1, 0, color) - 1 >= 4 || // אנכי
+                count(r, c, 1, 1, color) + count(r, c, -1, -1, color) - 1 >= 4 || // אלכסון 1
+                count(r, c, 1, -1, color) + count(r, c, -1, 1, color) - 1 >= 4;   // אלכסון 2
 
         if (!win) return noWin;
+        // אם יש ניצחון, מחזירים את הצבע המנצח
         return (color == Disk.Color.RED) ? redWin : yellowWin;
     }
 
+    /**
+     * פונקציית עזר לספירת רצף של דיסקיות באותו צבע בכיוון מסוים.
+     * @param dr שינוי בשורה (דלתא row)
+     * @param dc שינוי בעמודה (דלתא col)
+     */
     private int count(int r, int c, int dr, int dc, Disk.Color color) {
         int cnt = 0;
+        // לולאה שממשיכה כל עוד אנחנו בתוך הלוח ורואים את אותו הצבע
         while (r >= 0 && r < ROWS && c >= 0 && c < COLS && board[r][c] == color) {
             cnt++;
             r += dr;
@@ -108,11 +134,14 @@ public class GameMoudle {
         this.gameOver = gameOver;
     }
 
-    // מחשב קל: רנדום
+    /**
+     * מהלך מחשב ברמה קלה: בוחר עמודה פנויה בצורה אקראית לחלוטין.
+     */
     public Position aiMoveRandom() {
         if (gameOver) return null;
         if (getCurrentPlayer() != Disk.Color.YELLOW) return null;
 
+        // יצירת רשימה של כל העמודות שיש בהן מקום פנוי
         java.util.ArrayList<Integer> validCols = new java.util.ArrayList<>();
         for (int c = 0; c < getCols(); c++) {
             if (getCellColor(0, c) == Disk.Color.EMPTY) {
@@ -122,11 +151,14 @@ public class GameMoudle {
 
         if (validCols.isEmpty()) return null;
 
+        // בחירת מספר אקראי מתוך רשימת העמודות הפנויות
         int col = validCols.get(new java.util.Random().nextInt(validCols.size()));
         return dropDisk(col);
     }
 
-    // טקסט ל-Gemini
+    /**
+     * ממיר את הלוח הנוכחי למחרוזת טקסט כדי שה-Gemini AI יוכל לנתח את המצב.
+     */
     public String boardToGeminiText() {
         StringBuilder sb = new StringBuilder();
         sb.append("Board 6x7 (row 0 is top):\n");
@@ -143,25 +175,31 @@ public class GameMoudle {
         return sb.toString();
     }
 
-    // ================= HARD LOCAL SIMPLE =================
+    /**
+     * מהלך מחשב ברמה קשה (אלגוריתם מקומי):
+     * 1. מחפש אם המחשב יכול לנצח במהלך הזה.
+     * 2. מחפש אם השחקן עומד לנצח וחוסם אותו.
+     * 3. מנסה לתפוס את המרכז (עמודה 3).
+     * 4. מנסה עמודות קרובות למרכז.
+     */
     public Position aiMoveHardLocal() {
         if (gameOver) return null;
         if (getCurrentPlayer() != Disk.Color.YELLOW) return null;
 
-        // 1) ניצחון מיידי לצהוב
+        // 1) בדיקה: האם צהוב (מחשב) יכול לנצח עכשיו?
         Integer winCol = findWinningCol(Disk.Color.YELLOW);
         if (winCol != null) return dropDisk(winCol);
 
-        // 2) חסימה מיידית לאדום
+        // 2) בדיקה: האם אדום (שחקן) עומד לנצח? אם כן, תחסום אותו!
         Integer blockCol = findWinningCol(Disk.Color.RED);
         if (blockCol != null) return dropDisk(blockCol);
 
-        // 3) מרכז אם פנוי
+        // 3) אסטרטגיה: עדיפות לעמודה המרכזית (עמודה 3)
         if (getCellColor(0, 3) == Disk.Color.EMPTY) {
             return dropDisk(3);
         }
 
-        // 4) אחרת קרוב למרכז
+        // 4) סדר עדיפויות של עמודות מהמרכז החוצה
         int[] order = {2, 4, 1, 5, 0, 6};
         for (int col : order) {
             if (getCellColor(0, col) == Disk.Color.EMPTY) {
@@ -172,22 +210,29 @@ public class GameMoudle {
         return null;
     }
 
-    // מחפש עמודה שמנצחת לצבע
+    /**
+     * פונקציית עזר ל-AI: בודקת באופן וירטואלי (בלי להזיז באמת) אם הנחת דיסקית בעמודה מסוימת תנצח.
+     */
     private Integer findWinningCol(Disk.Color color) {
         for (int col = 0; col < COLS; col++) {
             int row = getDropRow(col);
-            if (row == -1) continue;
+            if (row == -1) continue; // עמודה מלאה
 
+            // "כאילו" מניחים את הדיסקית
             board[row][col] = color;
             boolean win = isWin(new Position(row, col)) != noWin;
+            // מחזירים את המצב לקדמותו (Undo)
             board[row][col] = Disk.Color.EMPTY;
 
-            if (win) return col;
+            if (win) return col; // מצאנו עמודה מנצחת
         }
         return null;
     }
 
-    // איפה הדיסק ינחת
+    /**
+     * מחזירה באיזו שורה תנחת דיסקית אם נזרוק אותה לעמודה מסוימת.
+     * מחזירה -1 אם העמודה מלאה.
+     */
     private int getDropRow(int col) {
         for (int row = ROWS - 1; row >= 0; row--) {
             if (board[row][col] == Disk.Color.EMPTY) return row;

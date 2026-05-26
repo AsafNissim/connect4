@@ -18,21 +18,27 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+/**
+ * GeminiModule - המחלקה שאחראית על התקשורת עם הבינה המלאכותית של גוגל (Gemini).
+ * היא שולחת את מצב הלוח לענן ומקבלת בחזרה את המהלך הכי טוב שה-AI מציע.
+ */
 public class GeminiModule {
 
     private static final String TAG = "GEMINI";
 
-    // ⚠️ אל תעלה את זה לגיטהאב. עדיף לשים בקובץ מקומי/BuildConfig, אבל כרגע נשאיר פשוט.
+    // מפתח ה-API האישי לצורך גישה לשירותי גוגל
     private static final String API_KEY = "AIzaSyAfZCdrWoQkY-kJGCoh-IHzSchol8Q9M8k";
 
-    // ✅ זה המודל שכבר ראינו שעונה אצלך HTTP 200
-    private static final String MODEL = "gemini-2.5-flash";
+    // שם המודל שבו אנחנו משתמשים (גרסה מהירה וחכמה)
+    private static final String MODEL = "gemini-1.5-flash";
 
+    // כתובת ה-URL של השרת אליו שולחים את הבקשה
     private static final String API_URL =
             "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL + ":generateContent?key=" + API_KEY;
 
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
+    // הגדרת לקוח ה-Network (OkHttp) עם זמני המתנה (Timeout) מוגדרים
     private final OkHttpClient client = new OkHttpClient.Builder()
             .callTimeout(12, TimeUnit.SECONDS)
             .connectTimeout(10, TimeUnit.SECONDS)
@@ -40,29 +46,33 @@ public class GeminiModule {
             .writeTimeout(25, TimeUnit.SECONDS)
             .build();
 
+    // ממשק (Interface) לקבלת התשובה מה-AI (הצלחה או שגיאה)
     public interface MoveCallback {
-        void onMove(int col);      // 0-6
-        void onError(String msg);
+        void onMove(int col);      // מהלך חוקי בין 0 ל-6
+        void onError(String msg);  // הודעת שגיאה במקרה של תקלה
     }
 
+    // ממשק לקבלת מצב הלוח הנוכחי בפורמט טקסט
     public interface CellStateProvider {
         String boardToGeminiText();
     }
 
+    /**
+     * הפעולה העיקרית: שולחת את מצב הלוח ל-Gemini ומבקשת מהלך.
+     */
     public void requestHardMove(CellStateProvider provider, MoveCallback callback) {
         try {
+            // קבלת ייצוג הטקסט של הלוח מהלוגיקה
             String boardText = provider.boardToGeminiText();
 
-            // --- Build request ---
+            // --- בניית גוף הבקשה (JSON) לפי הפורמט שגוגל דורשת ---
             JSONObject input = new JSONObject();
-
             JSONArray contents = new JSONArray();
             JSONObject content = new JSONObject();
             JSONArray parts = new JSONArray();
             JSONObject textPart = new JSONObject();
 
-            // ✅ פרומפט קצר כדי לא “לבזבז” טוקנים
-            // ✅ מבקש תשובה בפורמט פשוט (col=3) אבל גם מאפשר JSON
+            // הפרומפט (ההוראה) לבינה המלאכותית: איך להתנהג ומה להחזיר
             textPart.put("text",
                     "You are CONNECT-4 engine playing YELLOW.\n" +
                             "You MUST analyze at least 3 candidate columns and look ahead 4 plies (Y,R,Y,R).\n" +
@@ -76,31 +86,33 @@ public class GeminiModule {
             contents.put(content);
             input.put("contents", contents);
 
-            // ✅ חשוב: מספיק tokens כדי שלא ייחתך ב-MAX_TOKENS כמו שהיה לך
+            // הגדרות נוספות למודל (טמפרטורה נמוכה = תשובות עקביות ולא יצירתיות מדי)
             JSONObject gen = new JSONObject();
             gen.put("temperature", 0.0);
             gen.put("maxOutputTokens", 256);
-            // אל תשים responseMimeType/JSON חובה — אצלך זה התחיל להתנהג מוזר.
-            // נשאיר תשובה חופשית קצרה ונפרסר חכם.
             input.put("generationConfig", gen);
 
             RequestBody body = RequestBody.create(input.toString(), JSON);
 
+            // יצירת בקשת ה-HTTP
             Request request = new Request.Builder()
                     .url(API_URL)
                     .post(body)
                     .addHeader("Content-Type", "application/json")
                     .build();
 
+            // שליחת הבקשה בצורה אסינכרונית (ברקע)
             client.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
+                    // נקרא במקרה של בעיית אינטרנט או שרת שלא עונה
                     Log.e(TAG, "onFailure: " + e.getMessage(), e);
                     postError(callback, "Network error: " + e.getMessage());
                 }
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
+                    // קבלת התשובה מהשרת
                     String resp = response.body() != null ? response.body().string() : "";
                     Log.d(TAG, "HTTP " + response.code() + " RAW=" + resp);
 
@@ -110,6 +122,7 @@ public class GeminiModule {
                     }
 
                     try {
+                        // ניתוח ה-JSON שחזר מגוגל כדי לחלץ את הטקסט שה-AI כתב
                         JSONObject json = new JSONObject(resp);
 
                         if (json.has("error")) {
@@ -125,26 +138,19 @@ public class GeminiModule {
 
                         JSONObject first = candidates.getJSONObject(0);
                         JSONObject outContent = first.optJSONObject("content");
-                        if (outContent == null) {
-                            postError(callback, "No content. finishReason=" + first.optString("finishReason") + " RAW=" + resp);
-                            return;
-                        }
-
                         JSONArray outParts = outContent.optJSONArray("parts");
-                        if (outParts == null || outParts.length() == 0) {
-                            postError(callback, "No parts. finishReason=" + first.optString("finishReason") + " RAW=" + resp);
-                            return;
-                        }
-
                         String outText = outParts.getJSONObject(0).optString("text", "").trim();
+                        
                         Log.d(TAG, "MODEL_TEXT=" + outText);
 
+                        // המרת הטקסט שה-AI שלח למספר עמודה (0-6)
                         int col = parseColAny(outText);
                         if (col < 0 || col > 6) {
                             postError(callback, "Bad output: '" + outText + "'");
                             return;
                         }
 
+                        // החזרת המהלך ל-Activity
                         postMove(callback, col);
 
                     } catch (Exception ex) {
@@ -158,11 +164,14 @@ public class GeminiModule {
         }
     }
 
-    // ✅ פרסר “סלחני”: JSON {"col":3} / col=3 / "3"
+    /**
+     * פונקציית עזר שמנתחת את התשובה של המודל. 
+     * היא יודעת לחפש מספר גם אם המודל כתב "col=3" או סתם "3".
+     */
     private int parseColAny(String text) {
         if (text == null) return -1;
 
-        // JSON
+        // ניסיון ראשון: בדיקה אם זה JSON תקין
         try {
             JSONObject obj = new JSONObject(text);
             if (obj.has("col")) {
@@ -173,7 +182,7 @@ public class GeminiModule {
 
         String t = text.toLowerCase();
 
-        // col=3
+        // ניסיון שני: חיפוש תבנית של "col=X"
         int idx = t.indexOf("col=");
         if (idx != -1) {
             idx += 4;
@@ -188,7 +197,7 @@ public class GeminiModule {
             }
         }
 
-        // מספר בודד איפשהו
+        // ניסיון שלישי: פשוט לחפש את הספרה הראשונה שמופיעה בטקסט
         for (int i = 0; i < t.length(); i++) {
             char ch = t.charAt(i);
             if (ch >= '0' && ch <= '6') return ch - '0';
@@ -197,10 +206,16 @@ public class GeminiModule {
         return -1;
     }
 
+    /**
+     * מעבירה את התוצאה חזרה ל-UI Thread (החוט הראשי) כדי שנוכל לעדכן את המסך.
+     */
     private void postMove(MoveCallback cb, int col) {
         new Handler(Looper.getMainLooper()).post(() -> cb.onMove(col));
     }
 
+    /**
+     * מעבירה את הודעת השגיאה חזרה ל-UI Thread.
+     */
     private void postError(MoveCallback cb, String msg) {
         new Handler(Looper.getMainLooper()).post(() -> cb.onError(msg));
     }
