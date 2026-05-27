@@ -163,16 +163,26 @@ public class BoardGame extends View {
         }
 
         // 4. ציור הדיסקית שנמצאת באנימציית נפילה
-        if(animating){
-            Bitmap bmp = (animColor==Disk.Color.RED)?bmpRed:bmpYellow;
-            int cx = animCol*cellW+cellW/2;
+        if (animating) {
+            Bitmap bmp;
+            if (animColor == Disk.Color.RED) {
+                bmp = bmpRed;
+            } else {
+                bmp = bmpYellow;
+            }
 
-            int hw=bmp.getWidth()/2;
-            int hh=bmp.getHeight()/2;
+            int cx = animCol * cellW + cellW / 2;
+            int hw = bmp.getWidth() / 2;
+            int hh = bmp.getHeight() / 2;
 
             // המיקום משתנה בזמן אמת לפי animY שמחושב ב-Thread
-            dstRect.set(cx-hw,(int)(animY-hh),cx+hw,(int)(animY+hh));
-            c.drawBitmap(bmp,null,dstRect,null);
+            int left = cx - hw;
+            int top = (int) (animY - hh);
+            int right = cx + hw;
+            int bottom = (int) (animY + hh);
+
+            dstRect.set(left, top, right, bottom);
+            c.drawBitmap(bmp, null, dstRect, null);
         }
     }
 
@@ -211,25 +221,28 @@ public class BoardGame extends View {
     public void newColFromFirebase(int col) {
         // ניסיון להניח דיסקית בעמודה שנתקבלה
         final Position p = gameMoudle.dropDisk(col);
-        if(p==null) return; // אם העמודה מלאה, לא קורה כלום
+        if(p == null) return; 
 
         // החלפת תורות
-        if(turn == MainActivity.MODE_TWO_PLAYERS_RED)
-        {
+        if (turn == MainActivity.MODE_TWO_PLAYERS_RED) {
             turn = MainActivity.MODE_TWO_PLAYERS_YELLOW;
-        }
-        else
+        } else {
             turn = MainActivity.MODE_TWO_PLAYERS_RED;
+        }
 
-        // אם הלוח נמצא בתוך GameActivity, מפעילים אנימציה ומודיעים ל-Activity כשהיא מסתיימת
-        if(getContext() instanceof GameActivity){
-            animateDrop(p, new Runnable() {
-                @Override
-                public void run() {
-                    ((GameActivity)getContext()).onDiskPlaced(p); // בדיקת ניצחון אחרי הנחת הדיסקית
-                }
-            });
-        } else invalidate();
+        // פישוט: הפיכת המסך ל-GameActivity באופן ישיר
+        final GameActivity myActivity = (GameActivity) getContext();
+
+        // יצירת המשימה שתבוצע בסיום האנימציה
+        Runnable onAnimationEnd = new Runnable() {
+            @Override
+            public void run() {
+                myActivity.onDiskPlaced(p); // בדיקת ניצחון
+            }
+        };
+
+        // הפעלת האנימציה
+        animateDrop(p, onAnimationEnd);
     }
 
     // איפוס הלוח למצב התחלתי

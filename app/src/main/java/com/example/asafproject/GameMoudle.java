@@ -84,8 +84,15 @@ public class GameMoudle {
                         count(r, c, 1, 1, color) + count(r, c, -1, -1, color) - 1 >= 4 ||
                         count(r, c, 1, -1, color) + count(r, c, -1, 1, color) - 1 >= 4;
 
-        if (!win) return noWin;
-        return (color == Disk.Color.RED) ? redWin : yellowWin;
+        if (!win) {
+            return noWin;
+        }
+
+        if (color == Disk.Color.RED) {
+            return redWin;
+        } else {
+            return yellowWin;
+        }
     }
 
     private int count(int r, int c, int dr, int dc, Disk.Color color) {
